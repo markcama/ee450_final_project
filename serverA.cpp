@@ -11,6 +11,9 @@ Mark Camarena
 #define cipherKey 'S' 
 #define sendrecvflag 0
 
+// Global Variables
+int server_sd;	// server socket descriptor so we can close on SIGINT
+
 // User Constructor
 User::User() {
 	next_user = NULL;
@@ -131,7 +134,26 @@ vector<int> convertStrToVect(string str) {
 	return friends;
 }
 
+// Signal Handler Function
+// Reference: https://beej.us/guide/bgipc/html/multi/signals.html
+void sigint_handler(int signum) {
+	close(server_sd);
+	exit(signum);
+}
+
 int main() {
+
+	// Close the socket on keyboard interrupt
+	// Reference: https://beej.us/guide/bgipc/html/multi/signals.html
+	struct sigaction sa;
+	sa.sa_handler = sigint_handler;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+
+    if (sigaction(SIGINT, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(1);
+    }
 
 	// DECLARATIONS
 	// prepare to process data1.txt
@@ -221,13 +243,11 @@ int main() {
 	}
 
 	// Create the server's socket descriptor
-	int server_sd;
 	if ((server_sd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == 0) 
     { 
         cerr << "Socket failed." << endl;
         exit(EXIT_FAILURE);
     }
-
 
 	// Bind it to the port passed into getaddrinfo
 	// IP 127.0.0.1 on Port no 30533 (line 214)
@@ -236,9 +256,13 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
+	freeaddrinfo(servinfo);
+
 	cout << "The server A is up and running using UDP on port " << UDP_PORT_NO << endl;
 
-	// Server stands by.
+	while(true) {
+
+	}
 
 	return 0;
 }

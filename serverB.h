@@ -1,7 +1,8 @@
-#ifndef SERVERA_H
-#define SERVERA_H
+#ifndef SERVERB_H
+#define SERVERB_H
 
 #include <iostream>
+#include <csignal>
 #include <fstream>
 #include <sstream>
 #include <stdio.h>
@@ -17,6 +18,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <signal.h>
 using namespace std;
 
 class User {
@@ -71,5 +73,8 @@ string convertToString(char* a, int size);
 
 // take in a string of a users' friends' IDs and convert into a vector for a user object later
 vector<int> convertStrToVect(string str);
+
+// Signal Handler Function
+void sigint_handler(int signum)
 
 #endif
