@@ -75,6 +75,6 @@ string convertToString(char* a, int size);
 vector<int> convertStrToVect(string str);
 
 // Signal Handler Function
-void sigint_handler(int signum)
+void sigint_handler(int signum);
 
 #endif

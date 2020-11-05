@@ -6,7 +6,10 @@ Mark Camarena
 #include "serverA.h"
 
 #define IP_PROTOCOL 0
-#define UDP_PORT_NO 30533
+
+#define UDP_PORT_NO "30533"
+#define IP_ADDR "127.0.0.1"
+
 #define NET_BUF_SIZE 32 
 #define cipherKey 'S' 
 #define sendrecvflag 0
@@ -137,8 +140,11 @@ vector<int> convertStrToVect(string str) {
 // Signal Handler Function
 // Reference: https://beej.us/guide/bgipc/html/multi/signals.html
 void sigint_handler(int signum) {
+
+	freeaddrinfo(servinfo);
 	close(server_sd);
 	exit(signum);
+
 }
 
 int main() {
@@ -223,40 +229,50 @@ int main() {
 
 	//Prepare to connect
 
-
 	// Local Host must be 127.0.0.1
+	// copied from Beej's tutorial
 	struct sockaddr_in sa;
-	inet_pton(AF_INET, "127.0.0.1", &(sa.sin_addr)); // IPv4
-
-	int status;
-	struct addrinfo hints;
-	struct addrinfo *servinfo;
+	inet_pton(AF_INET, IP_ADDR, &(sa.sin_addr)); // IPv4
+	int status, numbytes;
+	struct addrinfo hints, *servinfo, *p;
+	struct sockaddr_storage their_addr;
 
 	memset(&hints, 0, sizeof hints); 	// make sure the struct is empty
 	hints.ai_family = AF_INET;     		// use IPv4
 	hints.ai_socktype = SOCK_DGRAM; 	// UDP sockets
 
 	// Error-checking on getaddrinfo. Can we create this socket?
-	if ((status = getaddrinfo("127.0.0.1", "30533", &hints, &servinfo)) != 0) {
+	// copied from Beej's tutorial
+	if ((status = getaddrinfo(IP_ADDR, UDP_PORT_NO, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
-		exit(EXIT_FAILURE);
+		return 1;
 	}
 
-	// Create the server's socket descriptor
-	if ((server_sd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == 0) 
-    { 
-        cerr << "Socket failed." << endl;
-        exit(EXIT_FAILURE);
-    }
+	// loop through all the results and bind to the first we can
+	// copied from Beej's tutorial
+	for(p = servinfo; p != NULL; p = p->ai_next) {
 
-	// Bind it to the port passed into getaddrinfo
-	// IP 127.0.0.1 on Port no 30533 (line 214)
-	if(bind(server_sd, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
-		cerr << "Could not successfully bind." << endl;
-		exit(EXIT_FAILURE);
+		if ((server_sd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == -1) {
+			perror("Socket");
+			continue;
+		}
+
+		if (bind(server_sd, p->ai_addr, p->ai_addrlen) == -1) {
+			close(server_sd);
+			perror("Bind");
+			continue;
+		}
+
+		break;
 	}
 
-	freeaddrinfo(servinfo);
+	// copied from Beej's
+	if (p == NULL) {	// could not bind to anything
+		cerr << "Failed to bind socket" << endl;
+		return 2;
+	}
+
+	freeaddrinfo(servinfo);	// free up the address info LL
 
 	cout << "The server A is up and running using UDP on port " << UDP_PORT_NO << endl;
 
