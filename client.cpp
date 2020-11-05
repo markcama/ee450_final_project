@@ -12,6 +12,8 @@
 #include <sys/wait.h>
 using namespace std;
 
+// port numbers are dynamic
+
 int main() {
 
 cout << "The client is up and running." << endl;

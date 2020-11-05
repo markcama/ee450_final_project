@@ -6,7 +6,7 @@ Mark Camarena
 #include "serverA.h"
 
 #define IP_PROTOCOL 0
-#define STATIC_PORT_NO 30533
+#define UDP_PORT_NO 30533
 #define NET_BUF_SIZE 32 
 #define cipherKey 'S' 
 #define sendrecvflag 0
@@ -191,6 +191,50 @@ int main() {
 			}
 		}
 	}
+
+	// Connect to the Main Server
+	// Reference for Remaining Code: http://beej.us/guide/bgnet/html/
+
+	//Prepare to connect
+
+
+	// Local Host must be 127.0.0.1
+	struct sockaddr_in sa;
+	inet_pton(AF_INET, "127.0.0.1", &(sa.sin_addr)); // IPv4
+
+	int status;
+	struct addrinfo hints;
+	struct addrinfo *servinfo;
+
+	memset(&hints, 0, sizeof hints); 	// make sure the struct is empty
+	hints.ai_family = AF_INET;     		// use IPv4
+	hints.ai_socktype = SOCK_DGRAM; 	// UDP sockets
+
+	// Error-checking on getaddrinfo. Can we create this socket?
+	if ((status = getaddrinfo("127.0.0.1", "30533", &hints, &res)) != 0) {
+		fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+		exit(EXIT_FAILURE);
+	}
+
+	// Create the server's socket descriptor
+	int server_sd;
+	if ((server_sd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == 0) 
+    { 
+        cerr << "Socket failed." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+
+	// Bind it to the port passed into getaddrinfo
+	// IP 127.0.0.1 on Port no 30533 (line 214)
+	if(bind(server_sd, res->ai_addr, res->ai_addrlen) < 0) {
+		cerr << "Could not successfully bind." << endl;
+		exit(EXIT_FAILURE);
+	}
+
+
+
+	cout << "The server A is up and running using UDP on port " << UDP_PORT_NO << endl;
 
 	// close the file
 	infile.close();

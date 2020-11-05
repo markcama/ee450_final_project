@@ -19,7 +19,7 @@ Mark Camarena
 using namespace std;
 
 #define IP_PROTOCOL 0
-#define STATIC_PORT_NO 31533
+#define UDP_PORT_NO 31533
 #define NET_BUF_SIZE 32 
 #define cipherKey 'S' 
 #define sendrecvflag 0
