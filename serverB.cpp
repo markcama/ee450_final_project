@@ -134,13 +134,25 @@ vector<int> convertStrToVect(string str) {
 	return friends;
 }
 
-// Signal Handler Function
-// Reference: https://beej.us/guide/bgipc/html/multi/signals.html
-void sigint_handler(int signum) {
-	close(server_sd);
-	exit(signum);
+// get sockaddr, IPv4 or IPv6:
+// copied from Beej's tutorial
+void *get_in_addr(struct sockaddr *sa)
+{
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
+
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+/// Signal Handler Function
+// Reference: https://beej.us/guide/bgipc/html/multi/signals.html
+void sigint_handler(int signum) {
+
+	close(server_sd);
+	exit(signum);
+
+}
 int main() {
 
 	// Close the socket on keyboard interrupt

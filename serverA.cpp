@@ -6,13 +6,9 @@ Mark Camarena
 #include "serverA.h"
 
 #define IP_PROTOCOL 0
-
 #define UDP_PORT_NO "30533"
 #define IP_ADDR "127.0.0.1"
-
-#define NET_BUF_SIZE 32 
-#define cipherKey 'S' 
-#define sendrecvflag 0
+#define MAXBUFLEN 100
 
 // Global Variables
 int server_sd;	// server socket descriptor so we can close on SIGINT
@@ -137,11 +133,21 @@ vector<int> convertStrToVect(string str) {
 	return friends;
 }
 
+// get sockaddr, IPv4 or IPv6:
+// copied from Beej's tutorial
+void *get_in_addr(struct sockaddr *sa)
+{
+	if (sa->sa_family == AF_INET) {
+		return &(((struct sockaddr_in*)sa)->sin_addr);
+	}
+
+	return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
 // Signal Handler Function
 // Reference: https://beej.us/guide/bgipc/html/multi/signals.html
 void sigint_handler(int signum) {
 
-	freeaddrinfo(servinfo);
 	close(server_sd);
 	exit(signum);
 
