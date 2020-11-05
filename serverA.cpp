@@ -192,8 +192,6 @@ int main() {
 		}
 	}
 
-	int abc = 2;
-
 	// close the file
 	infile.close();
 
