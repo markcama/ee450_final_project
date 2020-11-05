@@ -17,6 +17,7 @@ using namespace std;
 
 int main() {
 
-cout << "The Main server is up and running." << endl;
+
+	cout << "The Main server is up and running." << endl;
 
 }

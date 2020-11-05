@@ -27,11 +27,10 @@ User::User(int userID, string country, vector<int> friend_IDs) {
 User::~User() {
 	delete next_user;
 	delete prev_user;
-	delete[] friends;
 }
 
 int User::getUserID() {
-	return userID
+	return userID;
 }
 
 string User::getUserCountry() {
@@ -81,7 +80,7 @@ void Country::append(User* newUser) {
 
 	// if the list is empty
 	if(head_user == NULL) {
-		newUser->prev_user = NULL:
+		newUser->prev_user = NULL;
 		head_user = newUser;
 		return;
 	}
@@ -95,13 +94,13 @@ void Country::append(User* newUser) {
 
 }
 
-User* Country::searchUsers(string userID, string country) {
+User* Country::searchUsers(int userID, string country) {
 
-	User* ptr = head_user;
+	User *ptr = head_user;
 
 	while(ptr != NULL) {
 
-		if((ptr->getUserID() == userID) && (ptr->getCountry() == country))
+		if((userID == ptr->getUserID()) && (country == ptr->getUserCountry()))
 			return ptr;
 		else
 			ptr = ptr->next_user;
@@ -126,7 +125,7 @@ vector<int> convertStrToVect(string str) {
 	string ID;
 
 	while(ss >> ID) {
-		friends.push_back(stoi(num));
+		friends.push_back(stoi(ID));
 	}
 
 	return friends;
@@ -154,7 +153,7 @@ int main() {
 	while(getline(infile, buffer)) {	// keep reading the file
 
 		char* buff_array;
-		buff_array = &buff[0];	// convert buffer string into a char array for isalpha()
+		buff_array = &buffer[0];	// convert buffer string into a char array for isalpha()
 
 		if(isalpha(buff_array[0])) {	// We have found the name of a new country!
 
@@ -183,14 +182,19 @@ int main() {
 				friend_IDs_ints = convertStrToVect(friend_IDs_str);
 
 			    // create pointer pointing to a new user, add to country's list
-			    User* newUser = new User(userID, newCountry.get_name(), friend_IDs);
+			    User* newUser = new User(userID, 
+			    	newCountry.get_name(), 
+			    	friend_IDs_ints);
 			    newCountry.append(newUser);
 
 			    // peek and see if there's another user to process
-			    p = infile.peek()
+			    p = infile.peek();
 			}
 		}
 	}
+
+	// close the file
+	infile.close();
 
 	// Connect to the Main Server
 	// Reference for Remaining Code: http://beej.us/guide/bgnet/html/
@@ -211,14 +215,14 @@ int main() {
 	hints.ai_socktype = SOCK_DGRAM; 	// UDP sockets
 
 	// Error-checking on getaddrinfo. Can we create this socket?
-	if ((status = getaddrinfo("127.0.0.1", "30533", &hints, &res)) != 0) {
+	if ((status = getaddrinfo("127.0.0.1", "30533", &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
 		exit(EXIT_FAILURE);
 	}
 
 	// Create the server's socket descriptor
 	int server_sd;
-	if ((server_sd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == 0) 
+	if ((server_sd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == 0) 
     { 
         cerr << "Socket failed." << endl;
         exit(EXIT_FAILURE);
@@ -227,17 +231,14 @@ int main() {
 
 	// Bind it to the port passed into getaddrinfo
 	// IP 127.0.0.1 on Port no 30533 (line 214)
-	if(bind(server_sd, res->ai_addr, res->ai_addrlen) < 0) {
+	if(bind(server_sd, servinfo->ai_addr, servinfo->ai_addrlen) < 0) {
 		cerr << "Could not successfully bind." << endl;
 		exit(EXIT_FAILURE);
 	}
 
-
-
 	cout << "The server A is up and running using UDP on port " << UDP_PORT_NO << endl;
 
-	// close the file
-	infile.close();
+	// Server stands by.
 
 	return 0;
 }
