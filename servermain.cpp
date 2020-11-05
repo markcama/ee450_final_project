@@ -78,7 +78,7 @@ int main() {
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
 
-    // prepare to connect to Server A
+    // prepare for messages to Server A
     // For now Main Server is talking to Backend
     if ((rv = getaddrinfo(IP_ADDR, UDP_SERVERA_PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -101,6 +101,8 @@ int main() {
         return 2;
     }
 
+    cout << "The Main server is up and running." << endl;
+
     // create a message to cue Server A to send their country list
     char *on_msg = "Server A, send me your country list.";
     int msg_len = strlen(on_msg);
@@ -112,7 +114,5 @@ int main() {
         perror("servermain: sendto");
         exit(1);
     }
-
-	cout << "The Main server is up and running." << endl;
 
 }

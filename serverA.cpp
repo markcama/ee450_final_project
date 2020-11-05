@@ -8,7 +8,8 @@ Mark Camarena
 #define IP_PROTOCOL 0
 #define UDP_PORT_NO "30533"
 #define IP_ADDR "127.0.0.1"
-#define MAXBUFLEN 100
+
+#define MAXBUFLEN 250
 
 // Global Variables
 int server_sd;	// server socket descriptor so we can close on SIGINT
@@ -147,7 +148,7 @@ void *get_in_addr(struct sockaddr *sa)
 // Functions like strlen(), but this one accepts type pointer to char
 unsigned int charstar_strlen(char *p)
 {
-    unsigned int count = 0;
+    unsigned int count = 0;  
 
     while(*p!='\0')
     {
@@ -255,12 +256,15 @@ int main() {
 	inet_pton(AF_INET, IP_ADDR, &(sa.sin_addr)); // IPv4
 	int status, numbytes;
 	struct addrinfo hints, *servinfo, *p;
+
+	char ip4_main[INET_ADDRSTRLEN];
 	struct sockaddr_storage their_addr;
+	char buf[MAXBUFLEN];
+	socklen_t addr_len;
 
 	memset(&hints, 0, sizeof hints); 	// make sure the struct is empty
 	hints.ai_family = AF_INET;     		// use IPv4
 	hints.ai_socktype = SOCK_DGRAM; 	// UDP sockets
-
 	// Error-checking on getaddrinfo. Can we create this socket?
 	// copied from Beej's tutorial
 	if ((status = getaddrinfo(IP_ADDR, UDP_PORT_NO, &hints, &servinfo)) != 0) {
@@ -296,7 +300,22 @@ int main() {
 
 	cout << "The server A is up and running using UDP on port " << UDP_PORT_NO << endl;
 
+
 	while(true) {
+
+		addr_len = sizeof their_addr;
+	    if ((numbytes = recvfrom(server_sd, buf, MAXBUFLEN-1 , 0,
+	        (struct sockaddr *)&their_addr, &addr_len)) == -1) {
+	        perror("recvfrom");
+	        exit(1);
+    	}
+
+    	inet_ntop(their_addr.ss_family,
+    		get_in_addr((struct sockaddr *)&their_addr),
+            ip4_main, sizeof ip4_main);
+
+    	buf[numbytes] = '\0';
+    	printf("listener: packet contains \"%s\"\n", buf);
 
 	}
 
