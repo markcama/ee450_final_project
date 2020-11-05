@@ -144,6 +144,20 @@ void *get_in_addr(struct sockaddr *sa)
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+// Functions like strlen(), but this one accepts type pointer to char
+unsigned int charstar_strlen(char *p)
+{
+    unsigned int count = 0;
+
+    while(*p!='\0')
+    {
+        count++;
+        p++;
+    }
+
+    return count;
+}
+
 // Signal Handler Function
 // Reference: https://beej.us/guide/bgipc/html/multi/signals.html
 void sigint_handler(int signum) {

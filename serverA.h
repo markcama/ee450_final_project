@@ -74,6 +74,14 @@ string convertToString(char* a, int size);
 // take in a string of a users' friends' IDs and convert into a vector for a user object later
 vector<int> convertStrToVect(string str);
 
+// get sockaddr, IPv4 or IPv6:
+// copied from Beej's tutorial
+void *get_in_addr(struct sockaddr *sa)
+
+// Functions like strlen(), this one accepts type pointer to char
+// Built-in strlen() takes in a char[]
+unsigned int charstar_strlen(char *p)
+
 // Signal Handler Function
 void sigint_handler(int signum);
 
