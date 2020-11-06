@@ -33,11 +33,11 @@ User::~User() {
 }
 
 int User::getUserID() {
-	return userID;
+	return this->userID;
 }
 
 string User::getUserCountry() {
-	return country;
+	return this->country;
 }
 
 void User::setFriendsIDs(vector<int> &IDs) {
@@ -45,7 +45,7 @@ void User::setFriendsIDs(vector<int> &IDs) {
 }
 
 vector<int> User::getFriendsIDs() {
-	return friend_IDs;
+	return this->friend_IDs;
 }
 // Country/Graph Constructor
 Country::Country() {
@@ -71,7 +71,7 @@ void Country::set_name(string country_name) {
 }
 
 string Country::get_name() {
-	return name;
+	return this->name;
 }
 
 void Country::append(User* newUser) {

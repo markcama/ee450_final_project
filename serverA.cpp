@@ -16,21 +16,37 @@ int server_sd;	// server socket descriptor so we can close on SIGINT
 
 // User Constructor
 User::User() {
-	next_user = NULL;
-	prev_user = NULL;
+	int userID = 0;
+	string country = "";
 }
 
 // User Contructor
-User::User(int userID, string country, vector<int> friend_IDs) {
-	this->userID = userID;
+// User::User(int userID, vector<int> &friend_IDs, string country) {
+// 	this->userID = userID;
+// 	this->country = country;
+// 	this->friend_IDs = friend_IDs;
+// }
+
+void User::setUser(int id, string country, vector<int> &IDs) {
+	this->userID = id;
 	this->country = country;
-	this->friend_IDs = friend_IDs;
+	this->friend_IDs = IDs;
 }
 // User Destructor
-User::~User() {
-	delete next_user;
-	delete prev_user;
-}
+// User::~User() {
+// 	delete next_user;
+// 	delete prev_user;
+// }
+
+// 1. Adds the given node as next of the current node
+// inline void User::setNext(User *node) {
+// 	this->next_user = node;
+// }
+
+// // Return pointer of the next node
+// inline User* User::next() {
+//     return this->next_user;
+// }
 
 int User::getUserID() {
 	return userID;
@@ -40,31 +56,30 @@ string User::getUserCountry() {
 	return country;
 }
 
-void User::setFriendsIDs(vector<int> &IDs) {
-	this->friend_IDs = IDs;
-}
+// void User::setFriendsIDs(vector<int> &IDs) {
+// 	this->friend_IDs = IDs;
+// }
 
 vector<int> User::getFriendsIDs() {
 	return friend_IDs;
 }
 // Country/Graph Constructor
-Country::Country() {
-	head_user = NULL;
-	tail_user = NULL;
-}
+// Country::Country() {
+// 	head_user = NULL;
+// }
 
-Country::~Country() {
-	User* current = head_user;
-	User* next_user;
+// Country::~Country() {
+// 	User* current = head_user;
+// 	User* next_user;
 
-	while(current != NULL) {
-		next_user = current->next_user;
-		free(current);
-		current = next_user;
-	}
+// 	while(current != NULL) {
+// 		next_user = current->next_user;
+// 		free(current);
+// 		current = next_user;
+// 	}
 
-	head_user = NULL;
-}
+// 	head_user = NULL;
+// }
 
 void Country::set_name(string country_name) {
 	this->name = country_name;
@@ -74,43 +89,49 @@ string Country::get_name() {
 	return name;
 }
 
-void Country::append(User* newUser) {
+// void Country::pushBack(User *user) {
+// 	// Iterate through the end of the list and set new node as next
+//     // of last node
+//     // (Current List)->(Node)
 
-	// Add a new user to the country's linked list
-	User* last = head_user;
+// 	// If list's empty, made new node the head and return
+// 	if(head_user == NULL) {
+// 		head_user = user;
+// 	}
 
-	newUser->next_user = NULL;
+// 	User *current = head_user;
 
-	// if the list is empty
-	if(head_user == NULL) {
-		newUser->prev_user = NULL;
-		head_user = newUser;
-		return;
-	}
+// 	while(current && current->next()) {
+// 		current = current->next();
+// 	}
 
-	// else reach the end of the country's list
-	while(last->next_user != NULL)
-		last = last->next_user;
+// 	// At this point current is the last node
+//     // Set node as the next of the last node
 
-	// add the user to the end 
-	last->next_user = newUser;
+//     current->setNext(user);
+// }
 
-}
+// void Country::pushFront(User* user) {
+// 	// Set Next of Node to Head of the current list.
+//     //  (Node)->(Current List)
+//     user->setNext(head_user);
+//     head_user = user;
+// }
 
-User* Country::searchUsers(int userID, string country) {
+// User* Country::searchUsers(int userID, string country) {
 
-	User *ptr = head_user;
+// 	User *ptr = head_user;
 
-	while(ptr != NULL) {
+// 	while(ptr != NULL) {
 
-		if((userID == ptr->getUserID()) && (country == ptr->getUserCountry()))
-			return ptr;
-		else
-			ptr = ptr->next_user;
-	}
+// 		if((userID == ptr->getUserID()) && (country == ptr->getUserCountry()))
+// 			return ptr;
+// 		else
+// 			ptr = ptr->next_user;
+// 	}
 
-	return NULL;
-}
+// 	return NULL;
+// }
 
 // Reference: https://www.geeksforgeeks.org/convert-character-array-to-string-in-c/
 // use overloaded '=' operator from string class to convert character array to string 
@@ -134,6 +155,22 @@ vector<int> convertStrToVect(string str) {
 	return friends;
 }
 
+string listCountries(vector<Country> &countries) {
+
+	string msg;
+	string str;
+
+	// gather all the country names into one giant str
+	// separate them by a ","
+	for (int i = 0; i < countries.size(); i++) {
+
+		str = countries[i].get_name() + ",";
+		msg += str;
+	}
+
+	return msg;
+}
+
 // get sockaddr, IPv4 or IPv6:
 // copied from Beej's tutorial
 void *get_in_addr(struct sockaddr *sa)
@@ -143,20 +180,6 @@ void *get_in_addr(struct sockaddr *sa)
 	}
 
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
-// Functions like strlen(), but this one accepts type pointer to char
-unsigned int charstar_strlen(char *p)
-{
-    unsigned int count = 0;  
-
-    while(*p!='\0')
-    {
-        count++;
-        p++;
-    }
-
-    return count;
 }
 
 // Signal Handler Function
@@ -172,19 +195,19 @@ int main() {
 
 	// Close the socket on keyboard interrupt
 	// Reference: https://beej.us/guide/bgipc/html/multi/signals.html
-	struct sigaction sa;
-	sa.sa_handler = sigint_handler;
-	sa.sa_flags = 0;
-	sigemptyset(&sa.sa_mask);
+	struct sigaction sig_act;
+	sig_act.sa_handler = sigint_handler;
+	sig_act.sa_flags = 0;
+	sigemptyset(&sig_act.sa_mask);
 
-    if (sigaction(SIGINT, &sa, NULL) == -1) {
+    if (sigaction(SIGINT, &sig_act, NULL) == -1) {
         perror("sigaction");
         exit(1);
     }
 
 	// DECLARATIONS
 	// prepare to process data1.txt
-	vector<Country*> countries;	// vector of countries/graphs each with their users linked list
+	vector<Country> countries;	// vector of countries/graphs each with their users linked list
 	string buffer, country_str, user_ID_str, friend_IDs_str;
 	int userID;
 	vector<int> friend_IDs_ints;
@@ -200,6 +223,7 @@ int main() {
 	}
 
 	while(getline(infile, buffer)) {	// keep reading the file
+
 
 		char* buff_array;
 		buff_array = &buffer[0];	// convert buffer string into a char array for isalpha()
@@ -217,6 +241,7 @@ int main() {
 			// look for new users without taking anything out of the stream
 			char p = infile.peek();
 
+
 			while(isdigit(p)) {	// do this for every new user we find under a country
 
 				// take the next string out of the stream
@@ -230,15 +255,19 @@ int main() {
 				userID = stoi(user_ID_str);
 				friend_IDs_ints = convertStrToVect(friend_IDs_str);
 
-			    // create pointer pointing to a new user, add to country's list
-			    User* newUser = new User(userID, 
-			    	newCountry.get_name(), 
-			    	friend_IDs_ints);
-			    newCountry.append(newUser);
+				// Create new user
+				User newUser;
+				newUser.setUser(userID, country_str, friend_IDs_ints);
+
+				// add it to the list of countries
+				newCountry.users.push_back(newUser);
 
 			    // peek and see if there's another user to process
 			    p = infile.peek();
+
 			}
+
+			countries.push_back(newCountry);
 		}
 	}
 
@@ -300,6 +329,9 @@ int main() {
 
 	cout << "The server A is up and running using UDP on port " << UDP_PORT_NO << endl;
 
+	// Server A looks out for this message
+	// to signal it to send Main Server its list of countries.
+	const char *on_msg = "Server A, send me your country list.";
 
 	while(true) {
 
@@ -314,9 +346,18 @@ int main() {
     		get_in_addr((struct sockaddr *)&their_addr),
             ip4_main, sizeof ip4_main);
 
-    	buf[numbytes] = '\0';
-    	printf("listener: packet contains \"%s\"\n", buf);
+    	//printf("listener: got packet from %s\n",
+			// inet_ntop(their_addr.ss_family,
+			// get_in_addr((struct sockaddr *)&their_addr),
+			// ip4_main, sizeof ip4_main);
 
+		buf[numbytes] = '\0';
+		//printf("listener: packet contains \"%s\"\n", buf);
+
+
+    	if(strcmp(buf, on_msg) == 0) {
+
+    	}
 	}
 
 	return 0;

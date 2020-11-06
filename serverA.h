@@ -30,42 +30,41 @@ private:
 	int userID;
 	vector<int> friend_IDs;
 	string country;
-	User* next_user;
-	User* prev_user;
+	// User* next_user;
+	// User* prev_user;
 
 public:
 
 	User();
-	User(int userID, string country, vector<int> friend_IDs);
-	~User();
-	void setUser(int id, string country);
+	//User(int userID, vector<int> friend_IDs, string country);
+	//~User();
+	// Adds the given node as next of the current node
+    //inline void setNext(User *node);
+    // 3. Return pointer of the next node
+    //inline User* next();
+	void setUser(int id, string country, vector<int> &IDs);
 	int getUserID();
 	string getUserCountry();
-
-	void setFriendsIDs(vector<int> &IDs);
 	vector<int> getFriendsIDs();
 };
 
 class Country {
 
-	// friend class Countries;
-
 private:
 
 	string name;
-	User* head_user;
-	User* tail_user;
-	// Country* next_country;
-	// Country* prev_country;
+	// User* head_user;
 
 public:
 
-	Country();
-	~Country();
+	//Country();
+	//~Country();
+	vector <User> users;
 	void set_name(string country_name);
 	string get_name();
-	void append(User* newUser);
-	User* searchUsers(int userID, string country);
+	// void pushBack(User* user);
+	// void pushFront(User* user);
+	// User* searchUsers(int userID, string country);
 };
 
 // use overloaded '=' operator from string class to convert character array to string
@@ -76,11 +75,7 @@ vector<int> convertStrToVect(string str);
 
 // get sockaddr, IPv4 or IPv6:
 // copied from Beej's tutorial
-void *get_in_addr(struct sockaddr *sa)
-
-// Functions like strlen(), this one accepts type pointer to char
-// Built-in strlen() takes in a char[]
-unsigned int charstar_strlen(char *p)
+void *get_in_addr(struct sockaddr *sa);
 
 // Signal Handler Function
 void sigint_handler(int signum);

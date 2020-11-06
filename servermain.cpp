@@ -104,7 +104,7 @@ int main() {
     cout << "The Main server is up and running." << endl;
 
     // create a message to cue Server A to send their country list
-    char *on_msg = "Server A, send me your country list.";
+    const char *on_msg = "Server A, send me your country list.";
     int msg_len = strlen(on_msg);
 
     // send the message and check if its successful
@@ -114,5 +114,6 @@ int main() {
         perror("servermain: sendto");
         exit(1);
     }
+
 
 }
